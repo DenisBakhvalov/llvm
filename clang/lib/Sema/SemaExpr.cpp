@@ -228,7 +228,8 @@ bool Sema::DiagnoseUseOfDecl(NamedDecl *D, ArrayRef<SourceLocation> Locs,
             << Sema::KernelGlobalVariable;
       // Using ESIMD globals in SYCL context is not allowed
       else if (IsRuntimeEvaluated && isSYCLEsimdPrivateGlobal(VD) &&
-               VD->hasGlobalStorage() && !isa<ParmVarDecl>(VD))
+               VD->hasGlobalStorage() && !isa<ParmVarDecl>(VD) &&
+               !getCurFunctionDecl()->hasAttr<SYCLSimdAttr>())
         SYCLDiagIfDeviceCode(*Locs.begin(),
                              diag::err_esimd_global_in_sycl_context, DDR_SYCL);
       // Disallow const statics and globals that are not zero-initialized
