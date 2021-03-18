@@ -18377,6 +18377,12 @@ Decl *Sema::getObjCDeclContext() const {
   return (dyn_cast_or_null<ObjCContainerDecl>(CurContext));
 }
 
+Sema::DeviceDiagnosticReason Sema::getEmissionReason(FunctionDecl *FD) {
+  // TODO: Will be defined in later patches.
+  // For now, all diagnostics apply to every context
+  return Sema::DDR_ALL;
+}
+
 Sema::FunctionEmissionStatus Sema::getEmissionStatus(FunctionDecl *FD,
                                                      bool Final) {
   // SYCL functions can be template, so we check if they have appropriate
