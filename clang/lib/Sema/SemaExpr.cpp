@@ -218,6 +218,13 @@ bool Sema::DiagnoseUseOfDecl(NamedDecl *D, ArrayRef<SourceLocation> Locs,
       bool IsRuntimeEvaluated =
           ExprEvalContexts.empty() ||
           (!isUnevaluatedContext() && !isConstantEvaluated());
+
+      if (IsRuntimeEvaluated && isSYCLEsimdPrivateGlobal(VD) &&
+          VD->hasGlobalStorage() && !isa<ParmVarDecl>(VD))
+        SYCLDiagIfDeviceCode(*Locs.begin(),
+                             diag::err_sycl_restricted_esimd_global_usage,
+                             DDR_ESIMD);
+
       if (IsRuntimeEvaluated && !IsConst && VD->getStorageClass() == SC_Static)
         SYCLDiagIfDeviceCode(*Locs.begin(), diag::err_sycl_restrict)
             << Sema::KernelNonConstStaticDataVariable;

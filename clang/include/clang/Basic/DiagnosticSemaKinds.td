@@ -11166,6 +11166,8 @@ def err_ext_int_max_size : Error<"%select{signed|unsigned}0 _ExtInt of bit "
                                  "sizes greater than %1 not supported">;
 def err_esimd_glob_cant_init : Error<
   "SYCL explicit SIMD does not permit private global variable to have an initializer">;
+def err_sycl_restricted_esimd_global_usage
+    : Error<"Some text about esimd global usage">;
 
 def err_sycl_kernel_incorrectly_named : Error<"%0 is an invalid kernel name type">;
 def note_invalid_type_in_sycl_kernel : Note<
@@ -11232,10 +11234,10 @@ def err_sycl_invalid_accessor_property_list_template_param : Error<
 def err_sycl_num_kernel_wrong_reqd_wg_size : Error<
   "%0 attribute must evenly divide the work-group size for the %1 attribute">;
 
-def warn_sycl_pass_by_value_deprecated 
+def warn_sycl_pass_by_value_deprecated
     : Warning<"Passing kernel functions by value is deprecated in SYCL 2020">,
       InGroup<Sycl2020Compat>, ShowInSystemHeader;
-def warn_sycl_pass_by_reference_future 
+def warn_sycl_pass_by_reference_future
     : Warning<"Passing of kernel functions by reference is a SYCL 2020 extension">,
       InGroup<Sycl2017Compat>, ShowInSystemHeader;
 def warn_sycl_implicit_decl
