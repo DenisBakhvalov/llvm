@@ -230,7 +230,7 @@ bool Sema::DiagnoseUseOfDecl(NamedDecl *D, ArrayRef<SourceLocation> Locs,
       else if (IsRuntimeEvaluated && isSYCLEsimdPrivateGlobal(VD) &&
                VD->hasGlobalStorage() && !isa<ParmVarDecl>(VD))
         SYCLDiagIfDeviceCode(*Locs.begin(),
-                             diag::err_esimd_global_in_sycl_context, DDR_ESIMD);
+                             diag::err_esimd_global_in_sycl_context, DDR_SYCL);
       // Disallow const statics and globals that are not zero-initialized
       // or constant-initialized.
       else if (IsRuntimeEvaluated && IsConst && VD->hasGlobalStorage() &&

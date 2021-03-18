@@ -18379,6 +18379,10 @@ Decl *Sema::getObjCDeclContext() const {
 
 Sema::DeviceDiagnosticReason Sema::getEmissionReason(FunctionDecl *FD) {
   // TODO: ERICH: Figure out the logic here.
+  if (FD->hasAttr<SYCLSimdAttr>())
+    return Sema::DDR_ESIMD;
+  else if (FD->hasAttr<SYCLDeviceAttr>() || FD->hasAttr<SYCLKernelAttr>())
+    return Sema::DDR_SYCL;
   return Sema::DDR_ALL;
 }
 
