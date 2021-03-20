@@ -1603,10 +1603,15 @@ public:
   void visitUsedDecl(SourceLocation Loc, Decl *D) {
     if (isa<VarDecl>(D))
       return;
-    if (auto *FD = dyn_cast<FunctionDecl>(D))
+    if (auto *FD = dyn_cast<FunctionDecl>(D)) {
+      // Allow switching context from SYCL to ESIMD.
+      if ((RootReason == Sema::DDR_SYCL) &&
+          (S.getEmissionReason(FD) == Sema::DDR_ESIMD))
+        RootReason = Sema::DDR_ESIMD;
       checkFunc(Loc, FD);
-    else
+    } else {
       Inherited::visitUsedDecl(Loc, D);
+    }
   }
 
   void checkVar(VarDecl *VD) {
