@@ -133,6 +133,11 @@ __esimd_wrindirect(__SIGD::vector_type_t<T, N> OldVal,
                    __SIGD::vector_type_t<uint16_t, M> Offset,
                    sycl::INTEL::gpu::mask_type_t<M> Mask = 1);
 
+// lane-id for reusing scalar math functions.
+// Depending upon the SIMT mode(8/16/32), the return value should be
+// in the range of 0-7, 0-15, or 0-31.
+SYCL_EXTERNAL SYCL_ESIMD_FUNCTION int __esimd_lane_id();
+
 __SYCL_INLINE_NAMESPACE(cl) {
 namespace sycl {
 namespace INTEL {
@@ -204,6 +209,20 @@ readRegion(const __SIGD::vector_type_t<BT, BN> &Base, std::pair<T, U> Region) {
                                                                        Offset1);
   }
 }
+
+#ifdef __SYCL_DEVICE_ONLY__
+// Parallel-lane, using Lambda invocation
+#define SIMT_BEGIN(N, lane) [&] () SYCL_ESIMD_FUNCTION ESIMD_NOINLINE [[intel::sycl_esimd_vectorize(N)]] \
+    { int lane = __esimd_lane_id();
+#define SIMT_END }();
+
+#else // __SYCL_DEVICE_ONLY__
+
+// For emulating parallel-lane code
+#define SIMT_BEGIN(N, lane) for(int lane = 0; lane < N; ++lane) {
+#define SIMT_END }
+
+#endif // __SYCL_DEVICE_ONLY__
 
 } // namespace detail
 } // namespace gpu
