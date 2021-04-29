@@ -14,6 +14,7 @@
 #include <CL/sycl/INTEL/esimd/detail/esimd_host_util.hpp>
 #include <CL/sycl/INTEL/esimd/detail/esimd_types.hpp>
 #include <CL/sycl/INTEL/esimd/esimd_enum.hpp>
+#include <CL/sycl/builtins.hpp>
 #include <cstdint>
 
 #define __SEIEED sycl::ext::intel::experimental::esimd::detail
@@ -315,7 +316,44 @@ SYCL_EXTERNAL SYCL_ESIMD_FUNCTION __SEIEED::vector_type_t<Ty, N>
 __esimd_dp4(__SEIEED::vector_type_t<Ty, N> v1,
             __SEIEED::vector_type_t<Ty, N> v2);
 
-#ifndef __SYCL_DEVICE_ONLY__
+#ifdef __SYCL_DEVICE_ONLY__
+
+// lane-id for reusing scalar math functions.
+// Depending upon the SIMT mode(8/16/32), the return value is
+// in the range of 0-7, 0-15, or 0-31.
+SYCL_EXTERNAL SYCL_ESIMD_FUNCTION int __esimd_lane_id();
+
+// Wrapper for designating a scalar region of code that will be
+// vectorized by the backend compiler.
+#define SIMT_BEGIN(N, lane)                                                    \
+  [&]() SYCL_ESIMD_FUNCTION ESIMD_NOINLINE                                     \
+      [[intel::sycl_esimd_vectorize(N)]] {                                     \
+    int lane = __esimd_lane_id();
+#define SIMT_END                                                               \
+  }                                                                            \
+  ();
+
+#define ESIMD_MATH_INTRINSIC_IMPL(type, func)                                  \
+  template <int SZ>                                                            \
+  SYCL_EXTERNAL SYCL_ESIMD_FUNCTION __SEIEED::vector_type_t<type, SZ>          \
+      esimd_##func##_impl(__SEIEED::vector_type_t<type, SZ> src0) {            \
+    __SEIEED::vector_type_t<type, SZ> retv;                                    \
+    SIMT_BEGIN(SZ, lane)                                                       \
+    retv[lane] = sycl::func(src0[lane]);                                       \
+    SIMT_END                                                                   \
+    return retv;                                                               \
+  }
+
+ESIMD_MATH_INTRINSIC_IMPL(float, sin)
+ESIMD_MATH_INTRINSIC_IMPL(float, cos)
+ESIMD_MATH_INTRINSIC_IMPL(float, exp)
+ESIMD_MATH_INTRINSIC_IMPL(float, log)
+
+#undef SIMT_BEGIN
+#undef SIMT_END
+#undef ESIMD_MATH_INTRINSIC_IMPL
+
+#else // __SYCL_DEVICE_ONLY__
 
 template <typename T>
 inline T extract(const uint32_t &width, const uint32_t &offset, uint32_t src,
@@ -928,6 +966,11 @@ __esimd_inv(__SEIEED::vector_type_t<float, SZ> src0) {
 template <int SZ>
 inline __SEIEED::vector_type_t<float, SZ>
 __esimd_log(__SEIEED::vector_type_t<float, SZ> src0) {
+  return esimd_log_impl(src0);
+};
+template <int SZ>
+inline __SEIEED::vector_type_t<float, SZ>
+esimd_log_impl(__SEIEED::vector_type_t<float, SZ> src0) {
   __SEIEED::vector_type_t<float, SZ> retv;
 
   for (int i = 0; i < SZ; i++) {
@@ -939,6 +982,11 @@ __esimd_log(__SEIEED::vector_type_t<float, SZ> src0) {
 template <int SZ>
 inline __SEIEED::vector_type_t<float, SZ>
 __esimd_exp(__SEIEED::vector_type_t<float, SZ> src0) {
+  return esimd_exp_impl(src0);
+};
+template <int SZ>
+inline __SEIEED::vector_type_t<float, SZ>
+esimd_exp_impl(__SEIEED::vector_type_t<float, SZ> src0) {
   __SEIEED::vector_type_t<float, SZ> retv;
 
   for (int i = 0; i < SZ; i++) {
@@ -946,7 +994,7 @@ __esimd_exp(__SEIEED::vector_type_t<float, SZ> src0) {
     retv[i] = powf(2.f, src0[i]);
   }
   return retv;
-};
+}
 template <int SZ>
 inline __SEIEED::vector_type_t<float, SZ>
 __esimd_sqrt(__SEIEED::vector_type_t<float, SZ> src0) {
@@ -982,7 +1030,12 @@ __esimd_rsqrt(__SEIEED::vector_type_t<float, SZ> src0) {
 };
 template <int SZ>
 inline __SEIEED::vector_type_t<float, SZ>
-__esimd_sin(__SEIEED::vector_type_t<float, SZ> src) {
+__esimd_sin(__SEIEED::vector_type_t<float, SZ> src0) {
+  return esimd_sin_impl(src0);
+};
+template <int SZ>
+inline __SEIEED::vector_type_t<float, SZ>
+esimd_sin_impl(__SEIEED::vector_type_t<float, SZ> src) {
   __SEIEED::vector_type_t<float, SZ> retv;
   for (int i = 0; i < SZ; i++) {
     SIMDCF_ELEMENT_SKIP(i);
@@ -992,7 +1045,12 @@ __esimd_sin(__SEIEED::vector_type_t<float, SZ> src) {
 };
 template <int SZ>
 inline __SEIEED::vector_type_t<float, SZ>
-__esimd_cos(__SEIEED::vector_type_t<float, SZ> src) {
+__esimd_cos(__SEIEED::vector_type_t<float, SZ> src0) {
+  return esimd_cos_impl(src0);
+};
+template <int SZ>
+inline __SEIEED::vector_type_t<float, SZ>
+esimd_cos_impl(__SEIEED::vector_type_t<float, SZ> src) {
   __SEIEED::vector_type_t<float, SZ> retv;
   for (int i = 0; i < SZ; i++) {
     SIMDCF_ELEMENT_SKIP(i);
@@ -1276,6 +1334,6 @@ __esimd_reduced_smin(__SEIEED::vector_type_t<Ty, N> src1,
 
 #undef __SEIEEED
 
-#endif // #ifndef __SYCL_DEVICE_ONLY__
+#endif // #ifdef __SYCL_DEVICE_ONLY__
 
 #undef __SEIEED

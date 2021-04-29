@@ -1042,16 +1042,40 @@ esimd_bf_extract(T1 src0, T2 src1, T3 src2) {
   }
 
 ESIMD_INTRINSIC_DEF(float, inv)
-ESIMD_INTRINSIC_DEF(float, log)
-ESIMD_INTRINSIC_DEF(float, exp)
 ESIMD_INTRINSIC_DEF(float, sqrt)
 ESIMD_INTRINSIC_DEF(float, sqrt_ieee)
 ESIMD_INTRINSIC_DEF(float, rsqrt)
-ESIMD_INTRINSIC_DEF(float, sin)
-ESIMD_INTRINSIC_DEF(float, cos)
 
 ESIMD_INTRINSIC_DEF(double, sqrt_ieee)
 
+#define ESIMD_INTRINSIC_DEF2(type, name)                                       \
+  template <int SZ>                                                            \
+  ESIMD_NODEBUG ESIMD_INLINE simd<type, SZ> esimd_##name(                      \
+      simd<type, SZ> src0) {                                                   \
+    return esimd_##name##_impl<SZ>(src0.data());                               \
+  }                                                                            \
+  ESIMD_NODEBUG ESIMD_INLINE simd<type, 1> esimd_##name(simd<type, 1> src0) {  \
+    return sycl::name(src0[0]);                                                   \
+  }                                                                            \
+  ESIMD_NODEBUG ESIMD_INLINE type esimd_##name(type src0) {                    \
+    return sycl::name(src0);                                                   \
+  }
+
+// native APIs use GenX intrinics that map to HW instructions
+namespace native {
+ESIMD_INTRINSIC_DEF(float, cos) // generates llvm.genx.cos
+ESIMD_INTRINSIC_DEF(float, sin)
+ESIMD_INTRINSIC_DEF(float, exp)
+ESIMD_INTRINSIC_DEF(float, log)
+} // namespace native
+
+// Emulated math APIs
+ESIMD_INTRINSIC_DEF2(float, cos) // generates __spirv_ocl_cos
+ESIMD_INTRINSIC_DEF2(float, sin)
+ESIMD_INTRINSIC_DEF2(float, exp)
+ESIMD_INTRINSIC_DEF2(float, log)
+
+#undef ESIMD_INTRINSIC_DEF2
 #undef ESIMD_INTRINSIC_DEF
 
 #define ESIMD_INTRINSIC_DEF(ftype, name)                                       \
