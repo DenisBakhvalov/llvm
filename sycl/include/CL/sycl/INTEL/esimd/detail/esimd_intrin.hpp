@@ -212,14 +212,18 @@ readRegion(const __SIGD::vector_type_t<BT, BN> &Base, std::pair<T, U> Region) {
 
 #ifdef __SYCL_DEVICE_ONLY__
 // Parallel-lane, using Lambda invocation
-#define SIMT_BEGIN(N, lane) [&] () SYCL_ESIMD_FUNCTION ESIMD_NOINLINE [[intel::sycl_esimd_vectorize(N)]] \
-    { int lane = __esimd_lane_id();
-#define SIMT_END }();
+#define SIMT_BEGIN(N, lane)                                                    \
+  [&]() SYCL_ESIMD_FUNCTION ESIMD_NOINLINE                                     \
+      [[intel::sycl_esimd_vectorize(N)]] {                                     \
+    int lane = __esimd_lane_id();
+#define SIMT_END                                                               \
+  }                                                                            \
+  ();
 
 #else // __SYCL_DEVICE_ONLY__
 
 // For emulating parallel-lane code
-#define SIMT_BEGIN(N, lane) for(int lane = 0; lane < N; ++lane) {
+#define SIMT_BEGIN(N, lane) for (int lane = 0; lane < N; ++lane) {
 #define SIMT_END }
 
 #endif // __SYCL_DEVICE_ONLY__
