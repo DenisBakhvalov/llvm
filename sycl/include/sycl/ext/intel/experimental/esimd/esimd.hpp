@@ -135,22 +135,30 @@ public:
   }
 
   /// View this simd object in a different element type.
-  template <typename EltTy> auto format() & {
+  template <typename EltTy> auto bit_cast() & {
     using TopRegionTy = detail::compute_format_type_t<simd, EltTy>;
     using RetTy = simd_view<simd, TopRegionTy>;
     TopRegionTy R(0);
     return RetTy{*this, R};
   }
 
-  // TODO @Ruyk, @iburyl - should renamed to bit_cast similar to std::bit_cast.
-  //
-  /// View as a 2-dimensional simd_view.
-  template <typename EltTy, int Height, int Width> auto format() & {
+  template <typename EltTy> 
+  __SYCL_DEPRECATED("use simd::bit_cast.") auto format() & {
+    return bit_cast<EltTy>();
+  }
+
+    /// View as a 2-dimensional simd_view.
+  template <typename EltTy, int Height, int Width> auto bit_cast() & {
     using TopRegionTy =
         detail::compute_format_type_2d_t<simd, EltTy, Height, Width>;
     using RetTy = simd_view<simd, TopRegionTy>;
     TopRegionTy R(0, 0);
     return RetTy{*this, R};
+  }
+
+  template <typename EltTy, int Height, int Width>
+  __SYCL_DEPRECATED("use simd::bit_cast.") auto format() & {
+    return bit_cast<EltTy, Height, Width>();
   }
 
   /// 1D region select, apply a region on top of this LValue object.
