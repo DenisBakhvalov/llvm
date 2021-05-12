@@ -45,9 +45,9 @@ bool test_simd_select() __attribute__((sycl_device)) {
   simd<int, 16> v(0, 1);
   auto ref0 = v.select<4, 2>(1);     // r{1, 3, 5, 7}
   auto ref1 = v.bit_cast<int, 4, 4>(); // 0,1,2,3;
-                                     // 4,5,6,7;
-                                     // 8,9,10,11;
-                                     // 12,13,14,15
+                                       // 4,5,6,7;
+                                       // 8,9,10,11;
+                                       // 12,13,14,15
   auto ref2 = ref1.select<2, 1, 2, 2>(0, 1);
   return ref0[0] == 1 && decltype(ref2)::getSizeX() == 2 &&
          decltype(ref2)::getStrideY() == 1;

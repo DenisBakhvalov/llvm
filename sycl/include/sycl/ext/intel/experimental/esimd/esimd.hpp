@@ -142,12 +142,13 @@ public:
     return RetTy{*this, R};
   }
 
-  template <typename EltTy> 
-  __SYCL_DEPRECATED("use simd::bit_cast.") auto format() & {
+  template <typename EltTy>
+  __SYCL_DEPRECATED("use simd::bit_cast.")
+  auto format() & {
     return bit_cast<EltTy>();
   }
 
-    /// View as a 2-dimensional simd_view.
+  /// View as a 2-dimensional simd_view.
   template <typename EltTy, int Height, int Width> auto bit_cast() & {
     using TopRegionTy =
         detail::compute_format_type_2d_t<simd, EltTy, Height, Width>;
@@ -157,7 +158,8 @@ public:
   }
 
   template <typename EltTy, int Height, int Width>
-  __SYCL_DEPRECATED("use simd::bit_cast.") auto format() & {
+  __SYCL_DEPRECATED("use simd::bit_cast.")
+  auto format() & {
     return bit_cast<EltTy, Height, Width>();
   }
 

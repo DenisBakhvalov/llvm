@@ -128,7 +128,8 @@ public:
   }
 
   template <typename EltTy>
-  __SYCL_DEPRECATED("use simd_view::bit_cast.") auto format() & {
+  __SYCL_DEPRECATED("use simd_view::bit_cast.")
+  auto format() & {
     return bit_cast<EltTy>();
   }
 
@@ -142,8 +143,9 @@ public:
     return RetTy{this->M_base, std::make_pair(TopReg, M_region)};
   }
 
-    template <typename EltTy, int Height, int Width>
-  __SYCL_DEPRECATED("use simd_view::bit_cast.") auto format() & {
+  template <typename EltTy, int Height, int Width>
+  __SYCL_DEPRECATED("use simd_view::bit_cast.")
+  auto format() & {
     return bit_cast<EltTy, Height, Width>();
   }
 
