@@ -71,6 +71,13 @@ public:
       return convert<ToTy, element_type, length>(read());
   }
 
+  template <typename T = simd_view,
+            typename = sycl::detail::enable_if_t<T::length == 1>>
+  //template <typename = sycl::detail::enable_if_t<length == 1>>
+  operator element_type() {
+    return read()[0];
+  }
+
   /// @{
   /// Assignment operators.
   simd_view &operator=(const simd_view &Other) { return write(Other.read()); }

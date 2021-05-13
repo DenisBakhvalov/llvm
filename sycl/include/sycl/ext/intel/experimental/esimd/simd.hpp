@@ -167,6 +167,12 @@ public:
     return {*this, Reg};
   }
 
+  template <int Size, int Stride>
+  const simd_view<simd, region1d_t<Ty, Size, Stride>> select(uint16_t Offset = 0) const {
+    region1d_t<Ty, Size, Stride> Reg(Offset);
+    return {*this, Reg};
+  }
+
   /// 1D region select, apply a region on top of this RValue object.
   ///
   /// \tparam Size is the number of elements to be selected.
@@ -189,7 +195,16 @@ public:
   //   element.
   // {/quote}
   /// Read single element, return value only (not reference).
-  Ty operator[](int i) const { return data()[i]; }
+  //Ty operator[](int i) const { return data()[i]; }
+  simd_view<simd, region1d_t<Ty, 1, 0>> operator[](int i) { return select<1, 0>(i); }
+  const simd_view<simd, region1d_t<Ty, 1, 0>> operator[](int i) const { return select<1, 0>(i); }
+
+  /*template <typename T = simd,
+            typename = sycl::detail::enable_if_t<T::length == 1>>
+  //template <typename = sycl::detail::enable_if_t<length == 1>>
+  operator element_type() {
+    return data()[0];
+  }*/
 
   // TODO ESIMD_EXPERIMENTAL
   /// Read multiple elements by their indices in vector

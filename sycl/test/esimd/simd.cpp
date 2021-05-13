@@ -15,7 +15,7 @@ bool test_simd_ctors() SYCL_ESIMD_FUNCTION {
   return v0[0] + v1[1] + v2[2] + v3[3] == 1 + 1 + 2 + 6;
 }
 
-void test_conversion() SYCL_ESIMD_FUNCTION {
+/*void test_conversion() SYCL_ESIMD_FUNCTION {
   simd<int, 32> v = 3;
   simd<float, 32> f = v;
   simd<char, 32> c = f;
@@ -240,3 +240,9 @@ bool test_simd_iselect() SYCL_ESIMD_FUNCTION {
   auto ref = v.select<8, 2>(0);
   return ref[0] == 16 && ref[14] == 32;
 }
+
+__attribute__((sycl_device)) bool test_simd_subscript() {
+  simd<int, 16> v = 1;
+  v[9] = 9;
+  return v[0] == 1 && v[9] == 9 && v[10] == 1;
+}*/
