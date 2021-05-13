@@ -240,3 +240,9 @@ bool test_simd_iselect() __attribute__((sycl_device)) {
   auto ref = v.select<8, 2>(0);
   return ref[0] == 16 && ref[14] == 32;
 }
+
+bool test_make_simd_view_1d_read() {
+  simd<int, 8> r = 0x0FF00F0F;
+  auto rv = make_simd_view<short>(r);
+  return rv[0] == 0x0F0F && rv[1] == 0x0FF0;
+}

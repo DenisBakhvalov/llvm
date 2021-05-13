@@ -28,6 +28,10 @@ namespace esimd {
 template <typename BaseTy, typename RegionTy> class simd_view {
   template <typename, int> friend class simd;
   template <typename, typename> friend class simd_view;
+  template <typename ToTy, typename FromTy, int Size>
+  friend auto make_simd_view(simd<FromTy, Size>& v);
+  template <typename EltTy, int Height, int Width, typename FromTy, int Size> 
+  friend auto make_simd_view(simd<FromTy, Size>& v);
 
 public:
   static_assert(!detail::is_simd_view_v<BaseTy>::value);
@@ -456,6 +460,27 @@ private:
   //
   RegionTy M_region;
 };
+
+/// Create a view of a simd object with a different element type ToTy.
+template <typename ToTy, typename FromTy, int Size> 
+auto make_simd_view(simd<FromTy, Size>& Val) {
+  using FromSimdTy = simd<FromTy, Size>;
+  using TopRegionTy = detail::compute_format_type_t<FromSimdTy, ToTy>;
+  using RetTy = simd_view<FromSimdTy, TopRegionTy>;
+  TopRegionTy R(0);
+  return RetTy{Val, R};
+}
+
+/// Create a 2-dimensional view of a simd object.
+template <typename EltTy, int Height, int Width, typename FromTy, int Size> 
+auto make_simd_view(simd<FromTy, Size>& Val) {
+  using FromSimdTy = simd<FromTy, Size>;
+  using TopRegionTy =
+      detail::compute_format_type_2d_t<FromSimdTy, EltTy, Height, Width>;
+  using RetTy = simd_view<FromSimdTy, TopRegionTy>;
+  TopRegionTy R(0, 0);
+  return RetTy{Val, R};
+}
 
 } // namespace esimd
 } // namespace experimental

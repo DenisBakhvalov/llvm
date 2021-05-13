@@ -136,10 +136,11 @@ public:
 
   /// View this simd object in a different element type.
   template <typename EltTy> auto bit_cast() & {
-    using TopRegionTy = detail::compute_format_type_t<simd, EltTy>;
+    /*using TopRegionTy = detail::compute_format_type_t<simd, EltTy>;
     using RetTy = simd_view<simd, TopRegionTy>;
     TopRegionTy R(0);
-    return RetTy{*this, R};
+    return RetTy{*this, R};*/
+    return make_simd_view<EltTy>(*this);
   }
 
   template <typename EltTy>
@@ -150,11 +151,12 @@ public:
 
   /// View as a 2-dimensional simd_view.
   template <typename EltTy, int Height, int Width> auto bit_cast() & {
-    using TopRegionTy =
+    /*using TopRegionTy =
         detail::compute_format_type_2d_t<simd, EltTy, Height, Width>;
     using RetTy = simd_view<simd, TopRegionTy>;
     TopRegionTy R(0, 0);
-    return RetTy{*this, R};
+    return RetTy{*this, R};*/
+    return make_simd_view<EltTy, Height, Width>(*this);
   }
 
   template <typename EltTy, int Height, int Width>
