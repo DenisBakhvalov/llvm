@@ -7,7 +7,7 @@
 
 using namespace sycl::ext::intel::experimental::esimd;
 
-bool test_simd_view_bin_ops() __attribute__((sycl_device)) {
+bool test_simd_view_bin_ops() SYCL_ESIMD_FUNCTION {
   simd<int, 16> v0 = 1;
   simd<int, 16> v1 = 2;
   auto ref0 = v0.select<8, 2>(0);
@@ -24,7 +24,7 @@ bool test_simd_view_bin_ops() __attribute__((sycl_device)) {
   return v0[0] == 1;
 }
 
-bool test_simd_view_unary_ops() __attribute__((sycl_device)) {
+bool test_simd_view_unary_ops() SYCL_ESIMD_FUNCTION {
   simd<int, 16> v0 = 1;
   simd<int, 16> v1 = 2;
   auto ref0 = v0.select<8, 2>(0);
@@ -36,21 +36,21 @@ bool test_simd_view_unary_ops() __attribute__((sycl_device)) {
   return v1[0] == 1;
 }
 
-bool test_simd_view_assign1() __attribute__((sycl_device)) {
+bool test_simd_view_assign1() SYCL_ESIMD_FUNCTION {
   simd<int, 32> v0(0, 1);
   simd<int, 16> v1(0, 1);
   v0.select<8, 1>(0) = v1.select<8, 1>(0) + v1.select<8, 1>(1);
   return v0[8] == 8 + 9;
 }
 
-bool test_simd_view_assign2() __attribute__((sycl_device)) {
+bool test_simd_view_assign2() SYCL_ESIMD_FUNCTION {
   simd<int, 32> v0 = 0;
   simd<int, 16> v1 = 1;
   v0.select<8, 1>(0) = v1.select<8, 1>(0);
   return v0[0] == 1;
 }
 
-bool test_simd_view_assign3() __attribute__((sycl_device)) {
+bool test_simd_view_assign3() SYCL_ESIMD_FUNCTION {
   simd<int, 64> v0 = 0;
   simd<int, 64> v1 = 1;
   auto mask = (v0.select<16, 1>(0) > v1.select<16, 1>(0));

@@ -74,8 +74,8 @@ public:
   template <typename T = simd_view,
             typename = sycl::detail::enable_if_t<T::length == 1>>
   //template <typename = sycl::detail::enable_if_t<length == 1>>
-  operator element_type() {
-    return read()[0];
+  operator element_type() const {
+    return (*this)[0];
   }
 
   /// @{
@@ -229,22 +229,32 @@ public:
 #undef DEF_BINOP
 
 #define DEF_RELOP(RELOP)                                                       \
+  template <typename T = simd_view,                                            \
+            typename = sycl::detail::enable_if_t<T::length != 1>>              \  
   ESIMD_INLINE friend simd<uint16_t, length> operator RELOP(                   \
       const simd_view &X, const value_type &Y) {                               \
     auto R = X.read().data() RELOP Y.data();                                   \
     mask_type_t<length> M(1);                                                  \
     return M & detail::convert<mask_type_t<length>>(R);                        \
+  }                                                                            \ 
+  template <typename T = simd_view,                                            \
+            typename = sycl::detail::enable_if_t<T::length == 1>>              \
+  ESIMD_INLINE friend bool operator RELOP(const simd_view &X,                  \
+                                          const element_type &Y) {             \
+    return (element_type)X RELOP Y;                                            \
   }                                                                            \
-  ESIMD_INLINE friend simd<uint16_t, length> operator RELOP(                   \
-      const value_type &X, const simd_view &Y) {                               \
-    auto R = X.data() RELOP Y.read().data();                                   \
-    mask_type_t<length> M(1);                                                  \
-    return M & detail::convert<mask_type_t<length>>(R);                        \
+  template <typename T = simd_view,                                            \
+            typename = sycl::detail::enable_if_t<T::length == 1>>              \  
+  ESIMD_INLINE friend bool operator RELOP(const simd_view &X,                  \
+                                          const simd_view &Y) {                \
+    return (element_type)X RELOP (element_type)Y;                              \
   }                                                                            \
+  template <typename T = simd_view,                                            \
+            typename = sycl::detail::enable_if_t<T::length != 1>>              \  
   ESIMD_INLINE friend simd<uint16_t, length> operator RELOP(                   \
       const simd_view &X, const simd_view &Y) {                                \
     return (X RELOP Y.read());                                                 \
-  }
+  }                                                                            
 
   DEF_RELOP(>)
   DEF_RELOP(>=)
@@ -342,7 +352,8 @@ public:
   template <typename T = simd_view,
             typename = sycl::detail::enable_if_t<T::is1D()>>
   element_type operator[](int i) const {
-    return read()[i];
+    const auto v = read();
+    return v[i];
   }
 
   /// \name Replicate

@@ -167,12 +167,6 @@ public:
     return {*this, Reg};
   }
 
-  template <int Size, int Stride>
-  const simd_view<simd, region1d_t<Ty, Size, Stride>> select(uint16_t Offset = 0) const {
-    region1d_t<Ty, Size, Stride> Reg(Offset);
-    return {*this, Reg};
-  }
-
   /// 1D region select, apply a region on top of this RValue object.
   ///
   /// \tparam Size is the number of elements to be selected.
@@ -195,10 +189,16 @@ public:
   //   element.
   // {/quote}
   /// Read single element, return value only (not reference).
-  //Ty operator[](int i) const { return data()[i]; }
+  Ty operator[](int i) const { return data()[i]; }
   simd_view<simd, region1d_t<Ty, 1, 0>> operator[](int i) { return select<1, 0>(i); }
-  const simd_view<simd, region1d_t<Ty, 1, 0>> operator[](int i) const { return select<1, 0>(i); }
+  //const simd_view<simd, region1d_t<Ty, 1, 0>> operator[](int i) const { return select<1, 0>(i); }
 
+  template <typename T = simd,
+            typename = sycl::detail::enable_if_t<T::length == 1>>
+  //template <typename = sycl::detail::enable_if_t<length == 1>>
+  operator element_type() const {
+    return data()[0];
+  }
   /*template <typename T = simd,
             typename = sycl::detail::enable_if_t<T::length == 1>>
   //template <typename = sycl::detail::enable_if_t<length == 1>>
@@ -243,6 +243,11 @@ public:
     auto V2 = V0 BINOP V1;                                                     \
     return ComputeTy(V2);                                                      \
   }                                                                            \
+  template <typename T = simd,                                                 \
+            typename = sycl::detail::enable_if_t<T::length == 1>>              \  
+  ESIMD_INLINE friend auto operator BINOP(const simd &X, const Ty &Y) {        \
+    return X BINOP simd(Y);                                                    \
+  }                                                                            \
   ESIMD_INLINE friend simd &operator OPASSIGN(simd &LHS, const simd &RHS) {    \
     using ComputeTy = detail::compute_type_t<simd>;                            \
     auto V0 = detail::convert<typename ComputeTy::vector_type>(LHS.data());    \
@@ -276,6 +281,15 @@ public:
     auto R = X.data() RELOP Y.data();                                          \
     mask_type_t<N> M(1);                                                       \
     return M & detail::convert<mask_type_t<N>>(R);                             \
+  }                                                                            \
+  /*ESIMD_INLINE friend simd<uint16_t, N> operator RELOP(const simd &X,        \
+                                                       const Ty &Y) {          \
+    return X RELOP simd(Y);                                                    \
+  }                                                                          */\
+  template <typename T = simd,                                                 \
+            typename = sycl::detail::enable_if_t<T::length == 1>>              \
+  ESIMD_INLINE friend bool operator RELOP(const simd &X, const Ty &Y) {        \
+    return (Ty)X RELOP Y;                                                  \
   }
 
   DEF_RELOP(>)
