@@ -167,6 +167,12 @@ public:
     return {*this, Reg};
   }
 
+  template <int Size, int Stride, typename BaseTy, typename RegionTy, typename = sycl::detail::enable_if_t<simd_view<BaseTy, RegionTy>::length == 1>>
+  simd_view<simd, region1d_t<Ty, Size, Stride>> select(const simd_view<BaseTy, RegionTy>& Offset) & {
+    using ElTy = typename simd_view<BaseTy, RegionTy>::element_type;
+    return select<Size, Stride>((ElTy)Offset);
+  }
+
   /// 1D region select, apply a region on top of this RValue object.
   ///
   /// \tparam Size is the number of elements to be selected.

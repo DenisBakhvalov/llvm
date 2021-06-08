@@ -21,3 +21,11 @@ void test_simd_subscript_binop() SYCL_ESIMD_FUNCTION {
   // uses simd implicit conversion if there is only one element in the vector
   int val = v1[0] + v1[1];
 }
+
+void test_simd_subscript_select() SYCL_ESIMD_FUNCTION {
+  simd<int, 4> v1 = 1;
+  simd<int, 4> v2 = 2;
+  
+  //v1.select<1, 1>((int)v2[2]) += 1;
+  v1.select<1, 1>(v2[2]) += 1;
+}

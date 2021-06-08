@@ -73,7 +73,6 @@ public:
 
   template <typename T = simd_view,
             typename = sycl::detail::enable_if_t<T::length == 1>>
-  //template <typename = sycl::detail::enable_if_t<length == 1>>
   operator element_type() const {
     return (*this)[0];
   }
