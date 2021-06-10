@@ -555,6 +555,8 @@ public:
     return (*this)[0];
   }
 
+  using BaseClass::operator=;
+
   #define DEF_RELOP(RELOP)                                                     \
   ESIMD_INLINE friend bool operator RELOP(const simd_view &X,                  \
                                           const simd_view &Y) {                \
