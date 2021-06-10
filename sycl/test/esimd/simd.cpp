@@ -67,7 +67,7 @@ bool test_simd_bin_op_promotion() SYCL_ESIMD_FUNCTION {
   return v2[0] == 32768;
 }
 
-bool test_simd_bin_ops() SYCL_ESIMD_FUNCTION {
+/*bool test_simd_bin_ops() SYCL_ESIMD_FUNCTION {
   simd<int, 8> v0 = 1;
   simd<int, 8> v1 = 2;
   v0 += v1;
@@ -240,3 +240,4 @@ bool test_simd_iselect() SYCL_ESIMD_FUNCTION {
   auto ref = v.select<8, 2>(0);
   return ref[0] == 16 && ref[14] == 32;
 }
+*/
